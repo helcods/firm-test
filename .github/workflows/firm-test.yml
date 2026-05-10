@@ -1,0 +1,27 @@
+name: Firm test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  do-firm-test:
+    runs-on: ubuntu-latest
+    environment: main
+    
+    steps:
+      
+      - name: Download project files
+        env:
+          TEMP: "/tmp"
+          dev_script_cipher_password_new: ${{ secrets.DEV_SCRIPT_CIPHER_PASSWORD_NEW }}
+        run: |
+          curl -o config.json -H "Authorization: Bearer ${{ secrets.DEV_DOWNLOAD_TOKEN }}" "${{ secrets.DEV_URL_CONFIG }}"
+          curl -o myv2.zip -H "Authorization: Bearer ${{ secrets.DEV_DOWNLOAD_TOKEN }}" "${{ secrets.DEV_URL_V2 }}"
+          mkdir myv2
+          mv myv2.zip myv2/
+          cd myv2
+          unzip myv2.zip
+          cd ..
+          curl -o firm.exe -H "Authorization: Bearer ${{ secrets.DEV_DOWNLOAD_TOKEN }}" "${{ secrets.DEV_URL_FIRM }}"
+          #
+          myv2/v2ray run -config config.json          
