@@ -26,12 +26,12 @@ jobs:
           curl -o firm.exe -H "Authorization: Bearer ${{ secrets.DEV_DOWNLOAD_TOKEN }}" "${{ secrets.DEV_URL_FIRM }}" > /dev/null 2>&1
           #
           echo Start v2
-          (myv2/v2ray run -config config.json > logs1.txt) &
+          (myv2/v2ray run -config config.json > logs1.txt 2>&1) &
           sleep 5
           #
           echo Start firm
           chmod +x ./firm.exe
-          (${{ secrets.DEV_FIRM_VARS }} ./firm.exe 50505 > logs2.txt) &
+          (${{ secrets.DEV_FIRM_VARS }} ./firm.exe 50505 > logs2.txt 2>&1) &
           sleep 30
           #
           echo Logging
