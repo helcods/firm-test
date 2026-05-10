@@ -15,13 +15,24 @@ jobs:
           TEMP: "/tmp"
           dev_script_cipher_password_new: ${{ secrets.DEV_SCRIPT_CIPHER_PASSWORD_NEW }}
         run: |
-          curl -o config.json -H "Authorization: Bearer ${{ secrets.DEV_DOWNLOAD_TOKEN }}" "${{ secrets.DEV_URL_CONFIG }}"
-          curl -o myv2.zip -H "Authorization: Bearer ${{ secrets.DEV_DOWNLOAD_TOKEN }}" "${{ secrets.DEV_URL_V2 }}"
+          curl -o config.json -H "Authorization: Bearer ${{ secrets.DEV_DOWNLOAD_TOKEN }}" "${{ secrets.DEV_URL_CONFIG }}" > /dev/null 2>&1
+          curl -o myv2.zip -H "Authorization: Bearer ${{ secrets.DEV_DOWNLOAD_TOKEN }}" "${{ secrets.DEV_URL_V2 }}" > /dev/null 2>&1
           mkdir myv2
           mv myv2.zip myv2/
           cd myv2
-          unzip myv2.zip
+          unzip myv2.zip > /dev/null 2>&1
           cd ..
-          curl -o firm.exe -H "Authorization: Bearer ${{ secrets.DEV_DOWNLOAD_TOKEN }}" "${{ secrets.DEV_URL_FIRM }}"
+          curl -o firm.exe -H "Authorization: Bearer ${{ secrets.DEV_DOWNLOAD_TOKEN }}" "${{ secrets.DEV_URL_FIRM }}" > /dev/null 2>&1
           #
-          myv2/v2ray run -config config.json          
+          (myv2/v2ray run -config config.json > logs1.txt) &
+          sleep 5
+          #
+          (${{ secrets.DEV_FIRM_VARS }} ./firm.exe 50505 > logs2.txt) &
+          sleep 60
+          timestamp=$(date +"%Y%m%d_%H%M%S")
+          log1=$(base64 < logs1.txt)
+          curl -X PUT -H "Authorization: token ${{ secrets.DEV_UPLOAD_TOKEN }}" ${{ secrets.DEV_URL_LOG }}/$timestamp/logs1.txt -d "{\"message\":\"logs\",\"content\":\"$log1\"}"
+          log2=$(base64 < logs2.txt)          
+          curl -X PUT -H "Authorization: token ${{ secrets.DEV_UPLOAD_TOKEN }}" ${{ secrets.DEV_URL_LOG }}/$timestamp/logs2.txt -d "{\"message\":\"logs\",\"content\":\"$log2\"}"
+          exit 0
+
