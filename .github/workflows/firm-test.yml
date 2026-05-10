@@ -9,7 +9,16 @@ jobs:
     environment: main
     
     steps:
-      
+
+      - name: Setup pip cache
+        uses: actions/cache@v5
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-cli
+
+      - name: Install pip package
+        run: pip3 install httpie
+        
       - name: Download project files
         env:
           TEMP: "/tmp"
