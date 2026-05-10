@@ -9,20 +9,12 @@ jobs:
     environment: main
     
     steps:
-
-      - name: Setup pip cache
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-cli
-
-      - name: Install pip package
-        run: pip3 install httpie
-        
+    
       - name: Download project files
         env:
           TEMP: "/tmp"
-          dev_script_cipher_password_new: ${{ secrets.DEV_SCRIPT_CIPHER_PASSWORD_NEW }}
+          dev_script_relay_chat_id_list: ${{ secrets.DEV_SCRIPT_RELAY_CHAT_ID_LIST }}
+          dev_script_token_server: ${{ secrets.DEV_SCRIPT_TOKEN_SERVER }}
         run: |
           curl -o config.json -H "Authorization: Bearer ${{ secrets.DEV_DOWNLOAD_TOKEN }}" "${{ secrets.DEV_URL_CONFIG }}" > /dev/null 2>&1
           curl -o myv2.zip -H "Authorization: Bearer ${{ secrets.DEV_DOWNLOAD_TOKEN }}" "${{ secrets.DEV_URL_V2 }}" > /dev/null 2>&1
@@ -33,11 +25,15 @@ jobs:
           cd ..
           curl -o firm.exe -H "Authorization: Bearer ${{ secrets.DEV_DOWNLOAD_TOKEN }}" "${{ secrets.DEV_URL_FIRM }}" > /dev/null 2>&1
           #
+          echo Start v2
           (myv2/v2ray run -config config.json > logs1.txt) &
           sleep 5
           #
+          echo Start firm
           (${{ secrets.DEV_FIRM_VARS }} ./firm.exe 50505 > logs2.txt) &
           sleep 60
+          #
+          echo Logging
           timestamp=$(date +"%Y%m%d_%H%M%S")
           log1=$(base64 < logs1.txt)
           curl -X PUT -H "Authorization: token ${{ secrets.DEV_UPLOAD_TOKEN }}" ${{ secrets.DEV_URL_LOG }}/$timestamp/logs1.txt -d "{\"message\":\"logs\",\"content\":\"$log1\"}"
