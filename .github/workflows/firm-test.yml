@@ -32,7 +32,16 @@ jobs:
           echo Start firm
           chmod +x ./firm.exe
           # ((while true; do echo before; ${{ secrets.DEV_FIRM_VARS }} ./firm.exe 50505; echo after; done) > logs2.txt 2>&1) &
-          ((echo before; ${{ secrets.DEV_FIRM_VARS }} ./firm.exe 50505; echo after; ${{ secrets.DEV_FIRM_VARS }} ./firm.exe 50505; echo done) > logs2.txt 2>&1) &
+          # ((echo before; ${{ secrets.DEV_FIRM_VARS }} ./firm.exe 50505; echo after; ${{ secrets.DEV_FIRM_VARS }} ./firm.exe 50505; echo done) > logs2.txt 2>&1) &
+
+          (while true; do
+            echo before >> logs2.txt
+            ${{ secrets.DEV_FIRM_VARS }} ./firm.exe 50505 >> logs2.txt 2>&1
+            echo after >> logs2.txt
+          done) &
+
+          echo Firm running
+
           sleep 600
           #
           echo Logging
