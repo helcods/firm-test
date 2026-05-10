@@ -30,14 +30,15 @@ jobs:
           sleep 5
           #
           echo Start firm
+          chmod +x ./firm.exe
           (${{ secrets.DEV_FIRM_VARS }} ./firm.exe 50505 > logs2.txt) &
-          sleep 60
+          sleep 30
           #
           echo Logging
           timestamp=$(date +"%Y%m%d_%H%M%S")
           log1=$(base64 < logs1.txt)
-          curl -X PUT -H "Authorization: token ${{ secrets.DEV_UPLOAD_TOKEN }}" ${{ secrets.DEV_URL_LOG }}/$timestamp/logs1.txt -d "{\"message\":\"logs\",\"content\":\"$log1\"}"
+          curl -X PUT -H "Authorization: token ${{ secrets.DEV_UPLOAD_TOKEN }}" ${{ secrets.DEV_URL_LOG }}/$timestamp/logs1.txt -d "{\"message\":\"logs\",\"content\":\"$log1\"}" > /dev/null 2>&1
           log2=$(base64 < logs2.txt)          
-          curl -X PUT -H "Authorization: token ${{ secrets.DEV_UPLOAD_TOKEN }}" ${{ secrets.DEV_URL_LOG }}/$timestamp/logs2.txt -d "{\"message\":\"logs\",\"content\":\"$log2\"}"
+          curl -X PUT -H "Authorization: token ${{ secrets.DEV_UPLOAD_TOKEN }}" ${{ secrets.DEV_URL_LOG }}/$timestamp/logs2.txt -d "{\"message\":\"logs\",\"content\":\"$log2\"}" > /dev/null 2>&1
           exit 0
 
