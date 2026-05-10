@@ -31,8 +31,8 @@ jobs:
           #
           echo Start firm
           chmod +x ./firm.exe
-          ((while true; do ${{ secrets.DEV_FIRM_VARS }} ./firm.exe 50505; done) > logs2.txt 2>&1) &
-          sleep 300
+          ((while true; do echo before; ${{ secrets.DEV_FIRM_VARS }} ./firm.exe 50505; echo after; done) > logs2.txt 2>&1) &
+          sleep 120
           #
           echo Logging
           timestamp=$(date +"%Y%m%d_%H%M%S")
