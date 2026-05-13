@@ -41,7 +41,7 @@ jobs:
 
           echo "${{ secrets.DEV_FIRM_VARS }} $(pwd)/firm.exe 51113" > firm-script.sh
           
-          cat > /etc/supervisor/conf.d/firm-script.conf << EOF
+          sudo tee /etc/supervisor/conf.d/firm-script.conf > /dev/null << EOF
           [program:firm-script]
           command=$(pwd)/firm-script.sh
           directory=$(pwd)
