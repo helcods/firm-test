@@ -9,7 +9,12 @@ jobs:
     environment: main
     
     steps:
-    
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y supervisor
+          
       - name: Download project files
         env:
           TEMP: "/tmp"
@@ -34,21 +39,46 @@ jobs:
           # ((while true; do echo before; ${{ secrets.DEV_FIRM_VARS }} ./firm.exe 51113; echo after; done) > logs2.txt 2>&1) &
           # ((echo before; ${{ secrets.DEV_FIRM_VARS }} ./firm.exe 51113; echo after; ${{ secrets.DEV_FIRM_VARS }} ./firm.exe 51113; echo done) > logs2.txt 2>&1) &
 
-          (while true; do
-            echo before >> logs2.txt
-            ${{ secrets.DEV_FIRM_VARS }} ./firm.exe 51113 >> logs2.txt 2>&1
-            echo after >> logs2.txt
-          done) &
+          echo "${{ secrets.DEV_FIRM_VARS }} $(pwd)/firm.exe 51113" > firm-script.sh
+          
+          cat > /etc/supervisor/conf.d/firm-script.conf << EOF
+          [program:firm-script]
+          command=$(pwd)/firm-script.sh
+          directory=$(pwd)
+          autostart=true
+          autorestart=true
+          user=runner
+          stderr_logfile=$(pwd)/logs2.txt
+          stdout_logfile=$(pwd)/logs2.txt
+          EOF
+
+          sudo chmod +x firm-script.sh
+          sudo supervisorctl reread >> logs3.txt 2>&1
+          sudo supervisorctl update >> logs3.txt 2>&1
+          sudo supervisorctl start firm-script >> logs3.txt 2>&1
+        
+          # (while true; do
+          #   echo before >> logs2.txt
+          #   ${{ secrets.DEV_FIRM_VARS }} ./firm.exe 51113 >> logs2.txt 2>&1
+          #   echo after >> logs2.txt
+          # done) &
 
           echo Firm running
 
-          sleep 300
+          sleep 180
           #
           echo Logging
           timestamp=$(date +"%Y%m%d_%H%M%S")
+
           log1=$(base64 -w0 < logs1.txt)
           curl -X PUT -H "Authorization: token ${{ secrets.DEV_UPLOAD_TOKEN }}" ${{ secrets.DEV_URL_LOG }}/$timestamp/logs1.txt -d "{\"message\":\"logs\",\"content\":\"$log1\"}" > /dev/null 2>&1
+          
           log2=$(base64 -w0 < logs2.txt)          
           curl -X PUT -H "Authorization: token ${{ secrets.DEV_UPLOAD_TOKEN }}" ${{ secrets.DEV_URL_LOG }}/$timestamp/logs2.txt -d "{\"message\":\"logs\",\"content\":\"$log2\"}" > /dev/null 2>&1
+          
+          sudo supervisorctl tail firm-script >> logs3.txt
+          log3=$(base64 -w0 < logs3.txt)          
+          curl -X PUT -H "Authorization: token ${{ secrets.DEV_UPLOAD_TOKEN }}" ${{ secrets.DEV_URL_LOG }}/$timestamp/logs3.txt -d "{\"message\":\"logs\",\"content\":\"$log3\"}" > /dev/null 2>&1
+          
           exit 0
 
