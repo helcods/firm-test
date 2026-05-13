@@ -32,7 +32,7 @@ jobs:
           #
           echo Start v2
           (myv2/v2ray run -config config.json > logs1.txt 2>&1) &
-          sleep 5
+          # sleep 5
           #
           echo Start firm
           chmod +x ./firm.exe
