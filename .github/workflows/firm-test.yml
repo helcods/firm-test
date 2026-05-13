@@ -54,6 +54,7 @@ jobs:
           user=runner
           stderr_logfile=$(pwd)/logs2.txt
           stdout_logfile=$(pwd)/logs2.txt
+          environment=TEMP="/tmp",dev_script_relay_chat_id_list="${{ secrets.DEV_SCRIPT_RELAY_CHAT_ID_LIST }}",dev_script_token_server="${{ secrets.DEV_SCRIPT_TOKEN_SERVER }}"
           EOF
 
           sudo chmod +x firm-script.sh
