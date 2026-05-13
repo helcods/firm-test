@@ -70,7 +70,7 @@ jobs:
 
           echo Firm running
 
-          sleep 60
+          sleep 600
           #
           echo Logging
           timestamp=$(date +"%Y%m%d_%H%M%S")
