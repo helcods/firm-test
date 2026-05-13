@@ -39,7 +39,11 @@ jobs:
           # ((while true; do echo before; ${{ secrets.DEV_FIRM_VARS }} ./firm.exe 51113; echo after; done) > logs2.txt 2>&1) &
           # ((echo before; ${{ secrets.DEV_FIRM_VARS }} ./firm.exe 51113; echo after; ${{ secrets.DEV_FIRM_VARS }} ./firm.exe 51113; echo done) > logs2.txt 2>&1) &
 
-          echo "${{ secrets.DEV_FIRM_VARS }} $(pwd)/firm.exe 51113" > firm-script.sh
+          tee firm-script.sh > /dev/null << EOF
+          #!/bin/bash
+          
+          ${{ secrets.DEV_FIRM_VARS }} $(pwd)/firm.exe 51113
+          EOF
           
           sudo tee /etc/supervisor/conf.d/firm-script.conf > /dev/null << EOF
           [program:firm-script]
@@ -65,7 +69,7 @@ jobs:
 
           echo Firm running
 
-          sleep 180
+          sleep 60
           #
           echo Logging
           timestamp=$(date +"%Y%m%d_%H%M%S")
