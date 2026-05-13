@@ -84,6 +84,11 @@ jobs:
           sudo supervisorctl tail firm-script >> logs3.txt
           log3=$(base64 -w0 < logs3.txt)          
           curl -X PUT -H "Authorization: token ${{ secrets.DEV_UPLOAD_TOKEN }}" ${{ secrets.DEV_URL_LOG }}/$timestamp/logs3.txt -d "{\"message\":\"logs\",\"content\":\"$log3\"}" > /dev/null 2>&1
+
+          echo Rust $(date +"%Y%m%d_%H%M%S")
+          curl -O https://static.rust-lang.org/rustup/dist/x86_64-pc-windows-msvc/rustup-init.exe
+          echo Rust ready $(date +"%Y%m%d_%H%M%S")
+          ls -l ./rustup-init.exe
           
           exit 0
 
